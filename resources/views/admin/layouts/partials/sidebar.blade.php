@@ -130,30 +130,6 @@
                         </a>
                     </li>
                 @endpermission
-                @permission('notifications_create')
-                    <li class="nav-main-heading">{{ __('Marketing Campaigns') }}</li>
-                    <li class="nav-main-item{{ request()->is('admin/marketing-campaigns/*') ? ' open' : '' }}">
-                        <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
-                            aria-expanded="true" href="#">
-                            <i class="nav-main-link-icon si si-bell"></i>
-                            <span class="nav-main-link-name">{{ __('Marketing Campaigns') }}</span>
-                        </a>
-                        <ul class="nav-main-submenu">
-                            <li class="nav-main-item">
-                                <a class="nav-main-link{{ request()->routeIs('admin.marketing-campaigns.mail') ? ' active' : '' }}"
-                                    href="{{ route('admin.marketing-campaigns.mail') }}">
-                                    <span class="nav-main-link-name">{{ __('Mail') }}</span>
-                                </a>
-                            </li>
-                            <li class="nav-main-item">
-                                <a class="nav-main-link{{ request()->routeIs('admin.marketing-campaigns.notification') ? ' active' : '' }}"
-                                    href="{{ route('admin.marketing-campaigns.notification') }}">
-                                    <span class="nav-main-link-name">{{ __('Notifications') }}</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                @endpermission
                 @permission('settings_update')
                     <li class="nav-main-heading">{{ __('Site Settings') }}</li>
                     <li class="nav-main-item{{ request()->is('admin/website-setup/*') ? ' open' : '' }}">

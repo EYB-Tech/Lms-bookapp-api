@@ -55,7 +55,7 @@
                     </div>
                 </a>
             </div>
-            
+
             <div class="col-6 col-lg-3">
                 <a class="block block-rounded block-link-shadow text-center" href="javascript:void(0)">
                     <div class="block-content block-content-full">
@@ -96,6 +96,15 @@
                                 {{ __('All') }}
                                 <span class="badge bg-primary rounded-pill">{{ $students->total() }}</span>
                             </a>
+                            {{--  --}}
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                                href="{{ route('admin.students.index', ['status_devices' => '0', 'search' => request()->search]) }}">
+                                {{ __('Not registered with devices') }}
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                                href="{{ route('admin.students.index', ['status_devices' => '1', 'search' => request()->search]) }}">
+                                {{ __('Registered with devices') }}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -122,11 +131,12 @@
                                 <th class="text-center" style="width: 100px;">
                                     <i class="far fa-user"></i>
                                 </th>
-                                <th>{{__('Name')}}</th>
-                                <th style="width: 20%;">{{__('Username')}}</th>
-                                <th style="width: 30%;">{{__('Email')}}</th>
-                                <th style="width: 15%;">{{__('Access')}}</th>
-                                <th class="text-center" style="width: 100px;">{{__('Actions')}}</th>
+                                <th>{{ __('Name') }}</th>
+                                <th style="width: 20%;">{{ __('Username') }}</th>
+                                <th style="width: 30%;">{{ __('Email') }}</th>
+                                <th style="width: 15%;">{{ __('Devices') }}</th>
+                                <th style="width: 15%;">{{ __('Access') }}</th>
+                                <th class="text-center" style="width: 100px;">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,6 +152,27 @@
                                     </td>
                                     <td class="fs-sm">{{ $student->username }}</td>
                                     <td class="fs-sm">{{ $student->email }}</td>
+                                    <td class="fs-sm">
+                                        @if ($student?->device)
+                                            <a class="btn btn-sm btn-alt-danger" href="javascript:void(0)"
+                                                onclick="event.preventDefault(); 
+                    if (confirm('Are you sure?')) {
+                        document.getElementById('delete-device-{{ $student?->device?->id }}').submit();
+                    }"
+                                                data-bs-toggle="tooltip" title="{{ __('Delete') . ' ' . __('Device') }}">
+                                                <i class="fa fa-fw fa-tablet-screen-button text-danger"></i>
+                                                {{ $student?->device?->device_name }}
+                                            </a>
+                                            <form action="{{ route('admin.devices.destroy', $student?->device?->id) }}"
+                                                id="delete-device-{{ $student?->device?->id }}" method="post"
+                                                style="display: none">
+                                                {{ csrf_field() }}
+                                                {{ method_field('delete') }}
+                                            </form>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td>
                                         @if ($student->email_verified_at)
                                             <span
@@ -177,7 +208,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5">
+                                    <td colspan="7">
 
                                         <div class="content content-full text-muted fs-sm fw-medium text-center">
                                             <p class="mb-1">

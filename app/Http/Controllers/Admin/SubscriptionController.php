@@ -40,11 +40,10 @@ class SubscriptionController extends Controller
 
         $subscriptionsQuery->when($request->input('search'), function ($query, $search) {
             $query->whereHas('course', function ($subQuery) use ($search) {
-                $subQuery->where('title', 'LIKE', "%$search%")
-                    ->orWhere('description', 'LIKE', "%$search%");
+                $subQuery->where('name', 'LIKE', "%$search%");
             })->orWhereHas('student', function ($subQuery) use ($search) {
                 $subQuery->where('name', 'LIKE', "%$search%")
-                    ->orWhere('email', 'LIKE', "%$search%");
+                    ->orWhere('email', 'LIKE', "%$search%")->orWhere('username', 'LIKE', "%$search%");
             });
         });
 

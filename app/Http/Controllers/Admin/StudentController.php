@@ -30,25 +30,53 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        // Get the status and search query from the request
-        $search = $request->input('search', '');   // Default is empty string
-        $students = User::query();
-        // Apply filter based on status
-        $students->where('type', 'Student');
-        // Apply search filter if a search term is provided
+
+        // Get the filters from the request
+        $search = $request->input('search', '');
+        $status = $request->input('status', '');
+        $status_devices = $request->input('status_devices', '');
+
+        // Start building the query
+        $students = User::where('type', 'Student');
+
+        // Apply search filter
         if (!empty($search)) {
             $students->where(function ($query) use ($search) {
-                $query->where('name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('email', 'LIKE', '%' . $search . '%');
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
             });
         }
 
+        // Apply email verification status filter
+        if ($status !== '') {
+            if ($status == 1) {
+                $students->whereNotNull('email_verified_at');
+            } elseif ($status == 0) {
+                $students->whereNull('email_verified_at');
+            }
+        }
+
+        // Apply device status filter
+        if ($status_devices !== '') {
+            if ($status_devices == 1) {
+                $students->whereHas('devices');
+            } elseif ($status_devices == 0) {
+                $students->whereDoesntHave('devices');
+            }
+        }
+
+        // Clone the base query to count verified and unverified students
         $total_available_students = (clone $students)->whereNotNull('email_verified_at')->count();
         $total_not_available_students = (clone $students)->whereNull('email_verified_at')->count();
-        // Get the filtered students with pagination
+
+        // Get the paginated result
         $students = $students->latest()->paginate(20);
+
         return view('admin.pages.students.index', compact('students', 'total_available_students', 'total_not_available_students'));
     }
+
 
     public function store(Request $request)
     {
@@ -125,7 +153,7 @@ class StudentController extends Controller
         mediaDeleteImage($user->image);
         $user->delete();
         session()->flash('success', __('Deleted successfully'));
-        return redirect()->back();
+        return redirect()->route('admin.students.index');
     }
 
     public function import(Request $request)

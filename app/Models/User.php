@@ -131,6 +131,10 @@ class User extends Authenticatable implements MustVerifyEmail, LaratrustUser,JWT
     {
         return $this->hasMany(Device::class, 'user_id');
     }
+    public function device()
+    {
+        return $this->hasOne(Device::class, 'user_id');
+    }
 
 
     public function lessons()
