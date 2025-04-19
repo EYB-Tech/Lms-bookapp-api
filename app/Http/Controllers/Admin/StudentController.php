@@ -22,7 +22,7 @@ class StudentController extends Controller
         $this->middleware(['permission:students_read'])->only(['index', 'show']);
         $this->middleware(['permission:students_create'])->only(['create', 'store', 'import']);
         $this->middleware(['permission:students_update'])->only(['edit', 'update']);
-        $this->middleware(['permission:students_delete'])->only(['destroy']);
+        $this->middleware(['permission:students_delete'])->only(['destroy', 'bulkDelete']);
     }
     /**
      * Display a listing of the resource.
@@ -152,6 +152,19 @@ class StudentController extends Controller
         }
         mediaDeleteImage($user->image);
         $user->delete();
+        session()->flash('success', __('Deleted successfully'));
+        return redirect()->route('admin.students.index');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'student_ids' => ['required', 'array'],
+            'student_ids.*' => ['integer', 'exists:users,id'],
+        ]);
+        $ids = $request->input('student_ids', []);
+
+        User::whereIn('id', $validated['student_ids'])->delete();
         session()->flash('success', __('Deleted successfully'));
         return redirect()->route('admin.students.index');
     }

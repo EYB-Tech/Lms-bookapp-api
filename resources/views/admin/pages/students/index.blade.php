@@ -1,5 +1,42 @@
 @extends('admin.layouts.app')
+@section('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectAll = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('.student-checkbox');
+        const form = document.getElementById('bulk-delete-form');
 
+        // Handle "Select All" checkbox
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+        }
+
+        // Handle "Delete Selected" click
+        document.querySelector('[onclick*="bulk-delete-form"]').addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Remove any previous hidden inputs
+            form.querySelectorAll('input[name="student_ids[]"]').forEach(input => input.remove());
+
+            // Add selected IDs as hidden inputs
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'student_ids[]';
+                    input.value = cb.value;
+                    form.appendChild(input);
+                }
+            });
+
+            // Submit the form
+            form.submit();
+        });
+    });
+</script>
+@endsection
 @section('content')
     <!-- Hero -->
     @component('components.admin.breadcrumb-one', [
@@ -44,18 +81,29 @@
                 </a>
             </div>
             <div class="col-6 col-lg-3">
-                <a class="block block-rounded block-link-shadow text-center" href="javascript:void(0)">
+                <a class="block block-rounded block-link-shadow text-center" href="javascript:void(0)"
+                    onclick="event.preventDefault(); 
+                if (confirm('Are you sure?')) {
+                    document.getElementById('bulk-delete-form').submit();
+                }">
                     <div class="block-content block-content-full">
-                        <div class="fs-2 fw-semibold text-danger">{{ $total_not_available_students }}</div>
+                        <div class="fs-2 fw-semibold text-danger">
+                            <i class="fa fa-trash"></i>
+                        </div>
                     </div>
                     <div class="block-content py-2 bg-body-light">
                         <p class="fw-medium fs-sm text-danger mb-0">
-                            {{ __('Not Active') }}
+                            {{ __('Delete Selected') }}
                         </p>
                     </div>
                 </a>
             </div>
-
+            <form action="{{ route('admin.students.bulk-delete') }}" id="bulk-delete-form" method="post"
+                style="display: none">
+                {{ csrf_field() }}
+                {{ method_field('delete') }}
+                <input type="hidden" name="student_ids[]">
+            </form>
             <div class="col-6 col-lg-3">
                 <a class="block block-rounded block-link-shadow text-center" href="javascript:void(0)">
                     <div class="block-content block-content-full">
@@ -128,6 +176,9 @@
                     <table class="table table-borderless table-striped table-vcenter">
                         <thead>
                             <tr>
+                                <th class="text-center" style="width: 40px;">
+                                    <input type="checkbox" id="select-all">
+                                </th>
                                 <th class="text-center" style="width: 100px;">
                                     <i class="far fa-user"></i>
                                 </th>
@@ -142,6 +193,9 @@
                         <tbody>
                             @forelse ($students as $student)
                                 <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="student_ids[]" value="{{ $student->id }}" class="student-checkbox">
+                                    </td>
                                     <td class="text-center">
                                         <img class="img-avatar img-avatar48" src="{{ getAvatar($student->image) }}"
                                             alt="{{ $student->name }}">

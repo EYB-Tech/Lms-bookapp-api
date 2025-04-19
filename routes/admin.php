@@ -83,6 +83,7 @@ Route::group(['middleware' => ['auth', 'checkUserType:Admin',]], function () {
                 Route::get('/students/export/example', 'exportExample')->name('students.export-example');
                 Route::put('/students/{student}/update', 'update')->name('students.update');
                 Route::delete('/students/{user}', 'destroy')->name('students.destroy');
+                Route::delete('/students/bulk/delete', 'bulkDelete')->name('students.bulk-delete');
             });
         });
         Route::controller(LanguageController::class)->group(function () {
